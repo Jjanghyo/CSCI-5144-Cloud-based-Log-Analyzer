@@ -1,4 +1,5 @@
 import json, logging
+from datetime import datetime, timezone
 from pathlib import Path
 
 file_path = Path("./data/server-01.jsonl")
@@ -49,4 +50,11 @@ def validate_log(log):
 
     return True, ""
 
-write_logs(file_path, "log_collection.log")
+def build_s3_key(filename):
+    now = datetime.now(timezone.utc)
+    date_path = now.strftime("%Y/%m/%d")
+
+    return f"raw-logs/{date_path}/{Path(filename).stem}/{Path(filename).name}"
+
+write_logs(file_path, "log_collector.log")
+print(build_s3_key("ejfewqiofjqjfjqoe.log"))
