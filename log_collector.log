@@ -1,1 +1,12 @@
 INFO:__main__:Successfully finished: valid: 3, invalid: 0
+INFO:__main__:Successfully finished: valid: 3, invalid: 0
+INFO:__main__:Successfully finished: valid: 0, invalid: 0
+INFO:__main__:Successfully finished: valid: 0, invalid: 0
+INFO:__main__:No valid logs to upload.
+INFO:__main__:Successfully finished: valid: 0, invalid: 0
+INFO:__main__:No valid logs to upload.
+INFO:__main__:Successfully finished: valid: 3, invalid: 0
+ERROR:__main__:S3_BUCKET environment variable is not set
+INFO:botocore.credentials:Found credentials in shared credentials file: ~/.aws/credentials
+INFO:__main__:Successfully finished: valid: 3, invalid: 0
+INFO:botocore.credentials:Found credentials in shared credentials file: ~/.aws/credentials

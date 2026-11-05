@@ -1,6 +1,9 @@
-import json, logging
+import json, logging, boto3, os, botocore
 from datetime import datetime, timezone
+from dotenv import load_dotenv
 from pathlib import Path
+
+load_dotenv()
 
 file_path = Path("./data/server-01.jsonl")
 logging.basicConfig(
@@ -37,6 +40,7 @@ def write_logs(read_path, write_path):
                 continue
 
         logger.info("Successfully finished: valid: %d, invalid: %d", valid_count, invalid_count)
+        return valid_count, invalid_count
 
 def validate_log(log):
     if not isinstance(log, dict):
@@ -56,5 +60,39 @@ def build_s3_key(filename):
 
     return f"raw-logs/{date_path}/{Path(filename).stem}/{Path(filename).name}"
 
-write_logs(file_path, "log_collector.log")
-print(build_s3_key("ejfewqiofjqjfjqoe.log"))
+def upload_to_s3(file_path, filename):
+    bucket_name = os.getenv("S3_BUCKET")
+    region = os.getenv("AWS_DEFAULT_REGION", "us-east-2")
+
+    if not bucket_name:
+        logger.error("S3_BUCKET environment variable is not set")
+
+    s3 = boto3.client("s3", region_name=region)
+
+    s3_key = build_s3_key(filename)
+
+    try:
+        s3.upload_file(
+            file_path,
+            bucket_name,
+            s3_key
+        )
+        logger.info("Successfully uploaded to S3: %s", s3_key)
+
+    except botocore.exceptions.ClientError as e:
+        logger.error("Failed to upload file to S3")
+        raise
+
+if __name__ == "__main__":
+    output_path = Path("./output/server-01.jsonl")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    valid_count, invalid_count = write_logs(
+        file_path,
+        output_path
+    )
+
+    if valid_count > 0:
+        upload_to_s3(output_path, file_path.name)
+    else:
+        logger.info("No valid logs to upload.")
