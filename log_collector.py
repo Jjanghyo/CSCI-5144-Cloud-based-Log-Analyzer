@@ -52,6 +52,18 @@ def validate_log(log):
     if log["status"] not in {"success", "failure"}:
         return False, "Invalid status"
 
+    if "timestamp" not in log:
+        return False, "Missing timestamp"
+    
+    if "source_ip" not in log:
+        return False, "Missing source_ip"
+    
+    if "event_type" not in log:
+        return False, "Missing event_type"
+
+    if "source" not in log:
+        return False, "Missing source"
+
     return True, ""
 
 def build_s3_key(filename):
