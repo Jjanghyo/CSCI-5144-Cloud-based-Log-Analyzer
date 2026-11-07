@@ -96,15 +96,23 @@ def upload_to_s3(file_path, filename):
         raise
 
 if __name__ == "__main__":
-    output_path = Path("./output/server-01.jsonl")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    data = Path("./data")
+    output_dir = Path("./output")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    valid_count, invalid_count = write_logs(
-        file_path,
-        output_path
-    )
+    valids = 0
+    invalids = 0
 
-    if valid_count > 0:
-        upload_to_s3(output_path, file_path.name)
-    else:
-        logger.info("No valid logs to upload.")
+    for input_path in sorted(data.glob("*.jsonl")):
+        file_path = input_path
+        output_path = output_dir / input_path.name
+        valid_count, invalid_count = write_logs(file_path, output_path)
+        valids += valid_count
+        invalids += invalid_count
+
+        if valid_count > 0:
+            upload_to_s3(output_path, file_path.name)
+        else:
+            logger.info("No valid logs to upload for %s.", file_path.name)
+
+    logger.info("Total valid logs: %d, Total invalid logs: %d", valids, invalids)
